@@ -1,0 +1,103 @@
+const Validator = require('../requests/Validator');
+
+const index = (req, res, db) => {
+	db.select('*').from('users')
+	  .then(data => {
+		if(data.length){
+			res.send({message:'Fetch Users Successfull', status:200, data:data});	
+		}else{
+			res.status(400).send({message:'Record not found', status:400, data:null});
+		}
+	})
+	.catch(err => {
+		res.status(400).send({message:'An error occured', status:400, data:null});
+	});
+}
+const show = (req, res, db) => {
+	const id = req.params.id;
+	db.select('*').from('users')
+	  .where({id}).then(data => {
+		if(data.length){
+			res.send({message:'Fetch User Successfull', status:200, data:data[0]});	
+		}else{
+			res.status(400).send({message:'Record not found', status:400, data:null});
+		}
+	})
+	.catch(err => {
+		res.status(400).send({message:'An error occured', status:400, data:null});
+	});
+}
+const signin = (req, res, db, bcrypt) => {
+	let validator = Validator(req.body);
+	if(!validator.formIsValid){
+		return res.status(400)
+				  .send({message:'Incorrect Details', status:400, data:{errors: validator.errors}});
+	}
+	const {email, password} = req.body;
+	db.select('email', 'hash').from('logins')
+	  .where({email}).then(data => {
+	  	const isValid = bcrypt.compareSync(password, data[0].hash);
+		if(data.length && isValid){
+			db.select('*').from('users')
+			  .where({email}).then(user => {
+			  	res.send({message:'Signin Successfull', status:200, data:user[0]});	
+			  });
+		}else{
+			res.status(400).send({message:'Wrong Email or Password', status:400, data:null});
+		}
+	})
+	.catch(err => {
+		res.status(400).send({message:'An error occured', status:400, data:null});
+	});
+}
+const store = (req, res, db, bcrypt) => {
+	let validator = Validator(req.body);
+	if(!validator.formIsValid){
+		return res.status(400)
+				  .send({message:'Incorrect Details', status:400, data:{errors: validator.errors}});
+	}
+	const {username, email, password} = req.body;
+	const hash = bcrypt.hashSync(password);
+	db.transaction(trn => {
+		trn.insert({ hash, email })
+			.into('logins')
+			.returning('email')
+			.then(userEmail => {
+				trn('users')
+				.returning('*')
+				.insert({
+					username:username, 
+					email:userEmail[0]['email'], 
+					created_at:new Date()
+				})
+				.then(data => {
+					res.send({message:'Signup Successfull', status:200, data:data[0] });
+				})
+		})
+		.then(trn.commit)
+		.catch(trn.rollback)
+
+	})
+	.catch(err => {
+		const errors = {};
+		if(err.detail.includes('email')){
+			errors['email'] = err.detail.substr(err.detail.indexOf("=")+1).replace(/[{()}]/g, '');;
+		}
+		res.status(400).send({message:'An error occured', status:400, data:{errors}});
+	});
+}
+
+const updateEntries = (req, res, db) => {
+	const { id } = req.body;
+	db('users').where({id})
+	.increment('entries', 1)
+	.returning('entries')
+	.then(data => {
+		res.json({message:'Upload Successfull', status:200, data:data[0] });
+	})
+	.catch(err => {
+		res.status(400).send({message:'An error occured', status:400, data:null});
+	});
+}
+
+module.exports = {index, show, signin, store, updateEntries}

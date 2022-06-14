@@ -1,0 +1,19 @@
+const  Clarifai = require('clarifai');
+
+const clarifaiApp = new Clarifai.App({
+  apiKey: process.env.CLARIFAI_KEY
+});
+
+const handle = (req, res) => {
+	const { imgUrl } = req.body;
+	clarifaiApp.models.predict(Clarifai.FACE_DETECT_MODEL, imgUrl)
+			    .then(data => {
+				    res.json({message:'Face Detection Successfull', status:200, data:data });
+				})
+	  			.catch(err => {
+	    			console.log('An Clarifai error occured');
+	 			});
+	
+}
+
+module.exports = { handle }
