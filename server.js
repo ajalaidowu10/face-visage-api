@@ -9,12 +9,14 @@ const app = express();
 app.use(express.urlencoded({extended:false}));
 app.use(express.json());
 app.use(cors());
+const ssl = (process.env.PG_SSL === 'true');
 const db = knex({
   client: 'pg',
-  connection: process.env.PG_CONNECTION_STRING,
-  ssl: true
+  connection: {
+  	connectionString: process.env.PG_CONNECTION_STRING,
+  	ssl: ssl
+  }
 });
-
 app.get('/users', (req, res) => { userController.index(req, res, db) });
 app.get('/users/:id', (req, res) => { userController.show(req, res, db) });
 app.post('/signin', (req, res) => { userController.signin(req, res, db, bcrypt) });
