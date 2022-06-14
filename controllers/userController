@@ -44,11 +44,11 @@ const signin = (req, res, db, bcrypt) => {
 			  	res.send({message:'Signin Successfull', status:200, data:user[0]});	
 			  });
 		}else{
-			res.status(400).send({message:'Wrong Email or Password', status:400, data:null});
+			res.status(400).send({message:'Wrong Email or Password', status:400, data:{errors: {email: 'Wrong Email or Password'}}});
 		}
 	})
 	.catch(err => {
-		res.status(400).send({message:'An error occured', status:400, data:null});
+		res.status(400).send({message:'An API error occured', status:400, data:null});
 	});
 }
 const store = (req, res, db, bcrypt) => {
@@ -98,7 +98,7 @@ const updateEntries = (req, res, db) => {
 		res.json({message:'Upload Successfull', status:200, data:data[0] });
 	})
 	.catch(err => {
-		res.status(400).send({message:'An error occured', status:400, data:null});
+		res.status(400).send({message:'An API error occured', status:400, data:null});
 	});
 }
 
