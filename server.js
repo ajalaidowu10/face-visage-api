@@ -11,7 +11,8 @@ app.use(express.json());
 app.use(cors());
 const db = knex({
   client: 'pg',
-  connection: process.env.PG_CONNECTION_STRING
+  connection: process.env.PG_CONNECTION_STRING,
+  ssl: true
 });
 
 app.get('/users', (req, res) => { userController.index(req, res, db) });

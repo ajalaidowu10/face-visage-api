@@ -10,6 +10,7 @@ const index = (req, res, db) => {
 		}
 	})
 	.catch(err => {
+		console.log(err);
 		res.status(400).send({message:'An error occured', status:400, data:null});
 	});
 }
@@ -79,6 +80,7 @@ const store = (req, res, db, bcrypt) => {
 
 	})
 	.catch(err => {
+		console.log(err);
 		const errors = {};
 		if(err.detail.includes('email')){
 			errors['email'] = err.detail.substr(err.detail.indexOf("=")+1).replace(/[{()}]/g, '');;
