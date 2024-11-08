@@ -1,4 +1,4 @@
-const Validator = require('../requests/Validator');
+const validator = require('../requests/user.request');
 
 const index = (req, res, db) => {
 	db.select('*').from('users')
@@ -29,10 +29,10 @@ const show = (req, res, db) => {
 	});
 }
 const signin = (req, res, db, bcrypt) => {
-	let validator = Validator(req.body);
-	if(!validator.formIsValid){
+	let validate = validator(req.body);
+	if(!validate.formIsValid){
 		return res.status(400)
-				  .send({message:'Incorrect Details', status:400, data:{errors: validator.errors}});
+				  .send({message:'Incorrect Details', status:400, data:{errors: validate.errors}});
 	}
 	const {email, password} = req.body;
 	db.select('email', 'hash').from('logins')
@@ -52,10 +52,10 @@ const signin = (req, res, db, bcrypt) => {
 	});
 }
 const store = (req, res, db, bcrypt) => {
-	let validator = Validator(req.body);
-	if(!validator.formIsValid){
+	let validate = validator(req.body);
+	if(!validate.formIsValid){
 		return res.status(400)
-				  .send({message:'Incorrect Details', status:400, data:{errors: validator.errors}});
+				  .send({message:'Incorrect Details', status:400, data:{errors: validate.errors}});
 	}
 	const {username, email, password} = req.body;
 	const hash = bcrypt.hashSync(password);

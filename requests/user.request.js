@@ -1,9 +1,9 @@
- const Validator = (form) => {
+ const validator = (form) => {
   let errors = {};
   let formIsValid = true;
 
   //UserName
-  if ('useranme' in form && !form["username"]) {
+  if ('username' in form && !form["username"]) {
     formIsValid = false;
     errors["username"] = "Username is required";
   }
@@ -54,4 +54,4 @@
   return {formIsValid, errors};
 }
 
-module.exports = Validator
+module.exports = validator
